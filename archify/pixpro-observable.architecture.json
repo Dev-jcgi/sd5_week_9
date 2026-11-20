@@ -1,0 +1,300 @@
+{
+ "diagram_type": "architecture",
+ "schema_version": 1,
+ "meta": {
+  "title": "PixPro observable y resistente",
+  "subtitle": "Cada servicio manda métricas, registros y trazas a un colector; las llamadas a dependencias llevan timeout, disyuntor y plan B.",
+  "locale": "es",
+  "quality_profile": "showcase",
+  "output": "public/diagramas/pixpro-observable.html",
+  "views": [
+   {
+    "id": "v1",
+    "label": "1 · Camino del lote",
+    "focus": [
+     "spa",
+     "proxy",
+     "api",
+     "db",
+     "broker",
+     "notif"
+    ],
+    "note": "El trace id nace en la SPA y viaja por el proxy, la API y el broker hasta Notificaciones."
+   },
+   {
+    "id": "v2",
+    "label": "2 · Observabilidad",
+    "focus": [
+     "api",
+     "notif",
+     "otel",
+     "prom",
+     "logs",
+     "traces",
+     "graf"
+    ],
+    "note": "OpenTelemetry recoge las tres señales y Grafana las muestra juntas."
+   },
+   {
+    "id": "v3",
+    "label": "3 · Si falla Miniaturas",
+    "focus": [
+     "api",
+     "mini"
+    ],
+    "note": "Timeout de 2 s, 1 reintento con jitter, disyuntor y un icono genérico como plan B."
+   }
+  ]
+ },
+ "components": [
+  {
+   "id": "spa",
+   "type": "frontend",
+   "label": "SPA PixPro",
+   "sublabel": "crea el trace id",
+   "pos": [
+    30,
+    220
+   ],
+   "size": [
+    170,
+    70
+   ]
+  },
+  {
+   "id": "proxy",
+   "type": "security",
+   "label": "Proxy / gateway",
+   "sublabel": "timeout 60 s",
+   "pos": [
+    250,
+    220
+   ],
+   "size": [
+    180,
+    70
+   ]
+  },
+  {
+   "id": "api",
+   "type": "backend",
+   "label": "API de lotes",
+   "sublabel": "timeouts + disyuntor",
+   "pos": [
+    490,
+    220
+   ],
+   "size": [
+    190,
+    70
+   ]
+  },
+  {
+   "id": "db",
+   "type": "database",
+   "label": "Base de datos",
+   "sublabel": "lotes",
+   "pos": [
+    490,
+    380
+   ],
+   "size": [
+    190,
+    64
+   ]
+  },
+  {
+   "id": "mini",
+   "type": "external",
+   "label": "Miniaturas",
+   "sublabel": "dependencia frágil",
+   "pos": [
+    490,
+    60
+   ],
+   "size": [
+    190,
+    64
+   ]
+  },
+  {
+   "id": "broker",
+   "type": "messagebus",
+   "label": "Broker",
+   "sublabel": "lote.events",
+   "pos": [
+    740,
+    220
+   ],
+   "size": [
+    170,
+    70
+   ],
+   "brand": "rabbitmq"
+  },
+  {
+   "id": "notif",
+   "type": "backend",
+   "label": "Notificaciones",
+   "sublabel": "WebSocket",
+   "pos": [
+    970,
+    220
+   ],
+   "size": [
+    180,
+    70
+   ]
+  },
+  {
+   "id": "otel",
+   "type": "cloud",
+   "label": "Colector OpenTelemetry",
+   "sublabel": "recibe las 3 señales",
+   "pos": [
+    740,
+    420
+   ],
+   "size": [
+    230,
+    64
+   ]
+  },
+  {
+   "id": "prom",
+   "type": "database",
+   "label": "Métricas",
+   "sublabel": "Prometheus",
+   "pos": [
+    1030,
+    330
+   ],
+   "size": [
+    170,
+    58
+   ]
+  },
+  {
+   "id": "logs",
+   "type": "database",
+   "label": "Registros",
+   "sublabel": "Loki",
+   "pos": [
+    1030,
+    410
+   ],
+   "size": [
+    170,
+    58
+   ]
+  },
+  {
+   "id": "traces",
+   "type": "database",
+   "label": "Trazas",
+   "sublabel": "Jaeger / Tempo",
+   "pos": [
+    1030,
+    490
+   ],
+   "size": [
+    170,
+    58
+   ]
+  },
+  {
+   "id": "graf",
+   "type": "frontend",
+   "label": "Grafana",
+   "sublabel": "tableros y alertas",
+   "pos": [
+    1250,
+    410
+   ],
+   "size": [
+    160,
+    64
+   ]
+  }
+ ],
+ "connections": [
+  {
+   "id": "c1",
+   "from": "spa",
+   "to": "proxy",
+   "label": "traceparent",
+   "variant": "emphasis"
+  },
+  {
+   "id": "c2",
+   "from": "proxy",
+   "to": "api"
+  },
+  {
+   "id": "c3",
+   "from": "api",
+   "to": "db"
+  },
+  {
+   "id": "c4",
+   "from": "api",
+   "to": "mini",
+   "label": "timeout 2 s",
+   "variant": "dashed"
+  },
+  {
+   "id": "c5",
+   "from": "api",
+   "to": "broker",
+   "label": "LoteCreado"
+  },
+  {
+   "id": "c6",
+   "from": "broker",
+   "to": "notif",
+   "label": "ImagenProcesada"
+  },
+  {
+   "id": "c7",
+   "from": "api",
+   "to": "otel",
+   "variant": "dashed"
+  },
+  {
+   "id": "c8",
+   "from": "notif",
+   "to": "otel",
+   "variant": "dashed"
+  },
+  {
+   "id": "c9",
+   "from": "otel",
+   "to": "prom"
+  },
+  {
+   "id": "c10",
+   "from": "otel",
+   "to": "logs"
+  },
+  {
+   "id": "c11",
+   "from": "otel",
+   "to": "traces"
+  },
+  {
+   "id": "c12",
+   "from": "prom",
+   "to": "graf"
+  },
+  {
+   "id": "c13",
+   "from": "logs",
+   "to": "graf"
+  },
+  {
+   "id": "c14",
+   "from": "traces",
+   "to": "graf"
+  }
+ ]
+}

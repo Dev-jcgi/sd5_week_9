@@ -1,0 +1,6 @@
+node_modules
+dist
+public/diagramas/*.finalize*.json
+public/diagramas/*.delivery.json
+*.local
+public/diagramas/*.browser-check.json
